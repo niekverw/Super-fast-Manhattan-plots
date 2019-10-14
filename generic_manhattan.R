@@ -5,7 +5,7 @@
 # @Yanick Hagemeijer (yanickhagemeijer@gmail.com) & Niek verweij
 #
 # Usage: 
-# RUN: Rscript ~/Analyses/generic_manhattan.R GWASdata.tsv chrom pos minus_log10_p TRUE outputfile 0.00000005 snps.to.color.tsv 1000000 black FALSE
+# RUN: Rscript generic_manhattan.R GWASdata.tsv chrom pos minus_log10_p TRUE outputfile 0.00000005 snps.to.color.tsv 1000000 black FALSE
 # 1st = filename
 # 2,3,4th = column names of chrom, pos and P 
 # 5th = TRUE = if Pval is logtransformed or not. 
