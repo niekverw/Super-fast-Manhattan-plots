@@ -5,14 +5,21 @@
 # @Yanick Hagemeijer (yanickhagemeijer@gmail.com) & Niek verweij
 #
 # Usage: 
-# e.g. Rscript ~/Analyses/generic_manhattan.R GWASdata.tsv chrom pos minus_log10_p TRUE outputfile 0.00000005 snps.to.color.tsv 1000000 black
-# WHere TRUE = if Pval is logtransformed or not. 
-# where snps.to.color.tsv includes position of top-snp to color:
-# chromosome	position	colour
-# 19	0	grey
-# 
+# RUN: Rscript ~/Analyses/generic_manhattan.R GWASdata.tsv chrom pos minus_log10_p TRUE outputfile 0.00000005 snps.to.color.tsv 1000000 black FALSE
+# 1st = filename
+# 2,3,4th = column names of chrom, pos and P 
+# 5th = TRUE = if Pval is logtransformed or not. 
+# 6th=outputfile
+# 7th = P Treshold
+# 8th =  snps.to.color.tsv includes position of top-snp to color:
+	# chromosome	position	colour
+	# 19	0	grey
+# 9th = window of loci to be coloroued
+# 10th = color of ? not sure anymore 
+# 11th = custom ylim, if FALSE then take the maximum, otherwise put a number in like 20, so max = -logp=20 
 # build 37
 #[^)\]}\S]\s*?(\n[ \t]*?)+print
+
 
 rm(list=ls()) # reset environment
 
@@ -349,7 +356,7 @@ default_known_color  = "green"
 default_known_window = 1e6L #1000000L
 
 
-
+## need to make this proper commandline..... 
 args = commandArgs(TRUE)
 
 input  = pop_command_arg() #1
@@ -359,14 +366,15 @@ input_pval_col = pop_command_arg() #4
 input_pval_col_logtransformed = pop_command_arg() #5
 output = pop_command_arg() #6
 
-signif_cutoff_str = pop_command_arg(default=default_signif_cutoff) #6
+signif_cutoff_str = pop_command_arg(default=default_signif_cutoff) #7
 signif_cutoff = as.numeric(signif_cutoff_str) 
 
-output_file = paste(output, ".", signif_cutoff_str, ".tiff", sep="")
+output_file = paste(output, ".", signif_cutoff_str, ".png", sep="")
 
-known_file   = pop_command_arg(default=pseudo_known_file) #7
-known_window = as.numeric(pop_command_arg(default=default_known_window))
-known_color  = pop_command_arg(default=default_known_color) #8
+known_file   = pop_command_arg(default=pseudo_known_file) #8
+known_window = as.numeric(pop_command_arg(default=default_known_window))#9
+known_color  = pop_command_arg(default=default_known_color) #10
+custom_ylim  = pop_command_arg(default="FALSE") #11
 
 print("start reading known variants data")
 known_data   = fread(known_file, header=TRUE, sep="\t", showProgress=TRUE) #, select=known_cols,colClasses=known_col_types
@@ -474,7 +482,7 @@ gwas_data_chromos = subset(gwas_data_chromos, gwas_data_chromos %in% gwas_data[,
 print("opening file to store plot in")
 print(output_file)
 ###########################################################
-tiff(file=output_file, width=21.56, height=8, unit="cm", res=1200, pointsize=5)
+png(file=output_file, width=21.56, height=8, unit="cm", res=1200, pointsize=5)
 
 
 ###########################################################
@@ -496,7 +504,7 @@ ignore_print_statement = gwas_data[
 		pch=ifelse(PVAL <= signif_cutoff, special_plot_symbol, standard_plot_symbol),
 		cex=ifelse(PVAL <= signif_cutoff, special_symbol_size, standard_symbol_size),
 		col=colour,
-		ylim=c(0,-log10(min(gwas_data[["PVAL"]],na.rm=TRUE))),
+		ylim=c(0,ifelse(custom_ylim=="FALSE", -log10(min(gwas_data[["PVAL"]],na.rm=TRUE)),as.numeric(custom_ylim))), 
 		xlim=c(0,chrom_sizes[.N,size_cumsum]),
 		#xlim=c(0,sum(max_posses[,chromosome_max])),
 		xlab="Chromosome",
